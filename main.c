@@ -5,21 +5,18 @@
 
 int contador_resultados = 0;
 
-void ler_arquivo(char* local, char * arquivo, int max_resultados){
-	if (contador_resultados == max_resultados) return;
-	if (!strstr(local, arquivo)) return;
+void ler_arquivo(char* local){
+	FILE* segmento_diretorio = fopen(local, "r");
+	char segmento[30];
+	fread(segmento, 1, 30, segmento_diretorio);
+	
 
-	FILE* sigD = fopen(local, "r");
-	char sig[30];
-	fread(sig, 1, 30, sigD);
-	contador_resultados++;
-	printf("%d. %s --\n", contador_resultados, local);
-	printf("\t%s\n",sig);
+	printf("\t%s\n",segmento);
 }
 
 void pesquisar_diretorio(char* local, char * arquivo, int max_resultados){
 
-	DIR *diretorio;
+  DIR *diretorio;
   struct dirent *dir;
   diretorio = opendir(local);
 
@@ -29,19 +26,23 @@ void pesquisar_diretorio(char* local, char * arquivo, int max_resultados){
 			strcat(nome_local, local);
 			strcat(nome_local, dir->d_name);
 
-			if(!(strcmp(dir->d_name, ".") == 0)){
-				if(!(strcmp(dir->d_name, "..") == 0)){
-					if(dir->d_type == 4){
-						strcat(nome_local, "/");
-						pesquisar_diretorio(nome_local, arquivo, max_resultados);
+			if(!(strcmp(dir->d_name, ".") == 0) && !(strcmp(dir->d_name, "..") == 0)){
+				if(dir->d_type == DT_DIR){
+					strcat(nome_local, "/");
+					pesquisar_diretorio(nome_local, arquivo, max_resultados);
+				}else if(strstr(dir->d_name, arquivo) != 0){
+					if(contador_resultados >= max_resultados){
+						return;
 					}
-					else{
-						ler_arquivo(nome_local, arquivo, max_resultados);
-					}
-				}
+					printf("%d. %s --\n", contador_resultados+1, nome_local);
+					contador_resultados++;
+					ler_arquivo(nome_local);
+					printf("\n");
+				
+				}	
 			}
 		}
-		closedir(diretorio);
+		//closedir(diretorio);
 	}
 }
 
