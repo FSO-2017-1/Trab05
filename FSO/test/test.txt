@@ -1,0 +1,5 @@
+Teste 30
+Escalonamento
+DMA
+RSA
+Virtualização
